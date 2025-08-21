@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FHR AI | Trading Signal Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600&display=swap');
+    
+    :root {
+      --primary: #14bba5;
+      --primary-dark: #0d8e7d;
+      --secondary: #7e42f5;
+      --dark: #0a0e17;
+      --darker: #05070c;
+      --light: #e0e6ef;
+      --signal-bg: #0a1420;
+      --card-bg: #111827;
+      --success: #00e676;
+      --warning: #ff9100;
+      --danger: #ff5252;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      min-height: 100vh;
+      font-family: 'Rajdhani', sans-serif;
+      background: linear-gradient(135deg, var(--darker), var(--dark));
+      color: var(--light);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      padding: 25px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      transform: rotate(30deg);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    
+    .logo-icon {
+      font-size: 32px;
+      margin-right: 12px;
+      color: white;
+    }
+    
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 2.2rem;
+      letter-spacing: 2px;
+      color: white;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+    
+    .content {
+      padding: 25px;
+    }
+    
+    .card {
+      background: rgba(10, 14, 24, 0.6);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .card-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+    
+    .card-title i {
+      margin-right: 10px;
+      font-size: 1.4rem;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--light);
+    }
+    
+    select, input {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: var(--light);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(20, 187, 165, 0.3);
+    }
+    
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(126, 66, 245, 0.4);
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(126, 66, 245, 0.6);
+    }
+    
+    .btn:disabled {
+      background: #424242;
+      color: #6b6b6b;
+      transform: none;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    
+    .signal-box {
+      background: var(--signal-bg);
+      padding: 20px;
+      border-radius: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      white-space: pre-wrap;
+      color: var(--success);
+      border-left: 4px solid var(--primary);
+      min-height: 200px;
+      overflow-y: auto;
+      max-height: 300px;
+    }
+    
+    .signal-up {
+      color: var(--success);
+    }
+    
+    .signal-down {
+      color: var(--danger);
+    }
+    
+    .countdown-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .countdown-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      color: var(--warning);
+      margin-bottom: 10px;
+    }
+    
+    .progress-container {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      width: 0%;
+      transition: width 1s linear;
+      border-radius: 10px;
+    }
+    
+    .telegram-toggle {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 30px;
+      margin-right: 10px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #2c3e50;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(30px);
+    }
+    
+    .telegram-fields {
+      display: grid;
+      grid-gap: 15px;
+      margin-top: 15px;
+    }
+    
+    @media (max-width: 500px) {
+      .container {
+        border-radius: 15px;
+      }
+      
+      .header {
+        padding: 20px 15px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .content {
+        padding: 20px 15px;
+      }
+    }
+    
+    .signal-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #8c9db5;
+    }
+    
+    .signal-direction {
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon"><i class="fas fa-satellite-dish"></i></div>
+        <h1>FHR AI</h1>
+      </div>
+      <p class="subtitle">Advanced Trading Signal Generator</p>
+    </div>
+    
+    <div class="content">
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-chart-line"></i>
+          <span>Market Selection</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="marketSelect"><i class="fas fa-exchange-alt"></i> Select Market</label>
+          <select id="marketSelect">
+            <option value="AXP-OTC">AXP-OTC</option>
+            <option value="USDBRL-OTC">USDBRL-OTC</option>
+            <option value="NZDUSD-OTC">NZDUSD-OTC</option>
+            <option value="USDTRY-OTC">USDTRY-OTC</option>
+            <option value="USDINR-OTC">USDINR-OTC</option>
+            <option value="USDBDT-OTC">USDBDT-OTC</option>
+            <option value="MSFT-OTC">MSFT-OTC</option>
+            <option value="INTEL-OTC">INTEL-OTC</option>
+            <option value="MCD-OTC">MCD-OTC</option>
+            <option value="USDJPY-OTC">USDJPY-OTC</option>
+            <option value="NZDCAD-OTC">NZDCAD-OTC</option>
+            <option value="NZDCHF-OTC">NZDCHF-OTC</option>
+            <option value="USDDZD-OTC">USDDZD-OTC</option>
+            <option value="PEPE-OTC">PEPE-OTC</option>
+            <option value="BTC CASH-OTC">BTC CASH-OTC</option>
+            <option value="AVALAANCE-OTC">AVALAANCE-OTC</option>
+            <option value="AXIE-OTC">AXIE-OTC</option>
+            <option value="POLKADOT-OTC">POLKADOT-OTC</option>
+            <option value="HAMSTER-OTC">HAMSTER-OTC</option>
+            <option value="LTC-OTC">LTC-OTC</option>
+            <option value="CHAINLINK-OTC">CHAINLINK-OTC</option>
+            <option value="ETH-OTC">ETH-OTC</option>
+            <option value="BEAM-OTC">BEAM-OTC</option>
+          </select>
+        </div>
+        
+        <button id="generateBtn" class="btn" onclick="generateSignal()">
+          <i class="fas fa-bolt"></i> GENERATE SIGNAL
+        </button>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">
+          <i class="fab fa-telegram"></i>
+          <span>Telegram Settings</span>
+        </div>
+        
+        <div class="telegram-toggle">
+          <label class="toggle-switch">
+            <input type="checkbox" id="enableTelegram">
+            <span class="slider"></span>
+          </label>
+          <label for="enableTelegram">Enable Telegram Notifications</label>
+        </div>
+        
+        <div id="telegramFields" class="telegram-fields">
+          <div class="form-group">
+            <label for="botToken"><i class="fas fa-key"></i> Bot Token</label>
+            <input type="text" id="botToken" placeholder="Enter your Telegram bot token">
+          </div>
+          
+          <div class="form-group">
+            <label for="chatId"><i class="fas fa-comment"></i> Chat ID</label>
+            <input type="text" id="chatId" placeholder="Enter your Telegram chat ID">
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-broadcast-tower"></i>
+          <span>Generated Signal</span>
+        </div>
+        
+        <div class="signal-box" id="output">
+          <!-- Signal will appear here -->
+          <div style="text-align: center; padding: 30px 0; color: #5a7d9a;">
+            <i class="fas fa-satellite" style="font-size: 3rem; margin-bottom: 15px;"></i>
+            <p>No signal generated yet</p>
+          </div>
+        </div>
+        
+        <div class="signal-meta">
+          <span id="signalTime"></span>
+          <span id="signalDirection" class="signal-direction"></span>
+        </div>
+      </div>
+      
+      <div class="countdown-container" id="countdownContainer" hidden>
+        <div class="countdown-text" id="countdownText"></div>
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const cooldownSeconds = 120;
+    const generateBtn = document.getElementById('generateBtn');
+    const countdownContainer = document.getElementById('countdownContainer');
+    const countdownText = document.getElementById('countdownText');
+    const progressBar = document.getElementById('progressBar');
+    const enableTelegramCheckbox = document.getElementById('enableTelegram');
+    const telegramFields = document.getElementById('telegramFields');
+    const signalTime = document.getElementById('signalTime');
+    const signalDirection = document.getElementById('signalDirection');
+
+    // Initialize the page
+    window.onload = function() {
+      // Check for cooldown
+      const cooldownEnd = localStorage.getItem('cooldownEnd');
+      if (cooldownEnd) {
+        const now = Date.now();
+        if (now < cooldownEnd) {
+          startCooldownTimer(cooldownEnd - now);
+        } else {
+          localStorage.removeItem('cooldownEnd');
+          enableButton();
+        }
+      }
+
+      // Load Telegram settings
+      const telegramEnabled = localStorage.getItem('telegramEnabled') === 'true';
+      enableTelegramCheckbox.checked = telegramEnabled;
+      telegramFields.style.display = telegramEnabled ? 'grid' : 'none';
+      
+      const botToken = localStorage.getItem('botToken');
+      const chatId = localStorage.getItem('chatId');
+      if (botToken) document.getElementById('botToken').value = botToken;
+      if (chatId) document.getElementById('chatId').value = chatId;
+
+      // Event listeners
+      enableTelegramCheckbox.addEventListener('change', function() {
+        telegramFields.style.display = this.checked ? 'grid' : 'none';
+        localStorage.setItem('telegramEnabled', this.checked);
+      });
+
+      document.getElementById('botToken').addEventListener('change', function() {
+        localStorage.setItem('botToken', this.value);
+      });
+      
+      document.getElementById('chatId').addEventListener('change', function() {
+        localStorage.setItem('chatId', this.value);
+      });
+    };
+
+    // Send message to Telegram
+    async function sendToTelegram(message, botToken, chatId) {
+      try {
+        const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'HTML'
+          })
+        });
+        
+        const data = await response.json();
+        return data.ok;
+      } catch (error) {
+        console.error('Error sending to Telegram:', error);
+        return false;
+      }
+    }
+
+    // Generate a new signal
+    function generateSignal() {
+      disableButton();
+
+      const cooldownEndTime = Date.now() + cooldownSeconds * 1000;
+      localStorage.setItem('cooldownEnd', cooldownEndTime);
+
+      const market = document.getElementById("marketSelect").value;
+      const direction = Math.random() < 0.5 ? "UP" : "DOWN";
+      const directionClass = direction === "UP" ? "signal-up" : "signal-down";
+
+      const now = new Date();
+      now.setHours(now.getUTCHours() + 6);
+      now.setMinutes(now.getMinutes() + 1);
+      const timeStr = now.toTimeString().split(" ")[0].substring(0,5);
+
+      const signal = `
+🌀======= 𝗦𝗜𝗚𝗡𝗔𝗟 =======🌀
+
+ Market: ${market}
+ Time: ${timeStr} (UTC+06:00)
+ Expiry: 1 MINUTE
+ Direction: ${direction}
+
+GENERATED BY @fhrofficial
+`;
+
+      // Display the signal
+      const outputElement = document.getElementById("output");
+      outputElement.innerHTML = signal.replace(/\n/g, '<br>');
+      outputElement.classList.add(directionClass);
+      
+      // Update signal metadata
+      const currentTime = new Date().toLocaleTimeString();
+      signalTime.textContent = `Generated: ${currentTime}`;
+      signalDirection.textContent = `Direction: ${direction}`;
+      signalDirection.className = `signal-direction ${directionClass}`;
+
+      // Send to Telegram if enabled
+      if (enableTelegramCheckbox.checked) {
+        const botToken = document.getElementById('botToken').value;
+        const chatId = document.getElementById('chatId').value;
+        
+        if (botToken && chatId) {
+          sendToTelegram(signal, botToken, chatId)
+            .then(success => {
+              if (!success) {
+                alert('Failed to send signal to Telegram. Check your settings.');
+              }
+            });
+        } else {
+          alert('Please enter both Bot Token and Chat ID for Telegram notifications.');
+        }
+      }
+
+      startCooldownTimer(cooldownSeconds * 1000);
+    }
+
+    // Start the cooldown timer
+    function startCooldownTimer(duration) {
+      let remaining = duration;
+      countdownContainer.hidden = false;
+
+      const updateTimer = () => {
+        if (remaining <= 0) {
+          enableButton();
+          countdownContainer.hidden = true;
+          localStorage.removeItem('cooldownEnd');
+          return;
+        }
+        
+        const seconds = Math.ceil(remaining / 1000);
+        countdownText.textContent = `Next signal in: ${seconds}s`;
+        const progressPercent = ((cooldownSeconds * 1000 - remaining) / (cooldownSeconds * 1000)) * 100;
+        progressBar.style.width = progressPercent + '%';
+        remaining -= 1000;
+        
+        setTimeout(updateTimer, 1000);
+      };
+
+      updateTimer();
+    }
+
+    // Disable generate button
+    function disableButton() {
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<i class="fas fa-lock"></i> GENERATING...';
+    }
+
+    // Enable generate button
+    function enableButton() {
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = '<i class="fas fa-bolt"></i> GENERATE SIGNAL';
+    }
+  </script>
+
+</body>
+</html>
